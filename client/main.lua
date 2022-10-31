@@ -31,7 +31,7 @@ CreateThread(function()
                         name = 'PawnShop' .. key,
                         event = 'qb-pawnshop:client:openMenu',
                         icon = 'fas fa-ring',
-                        label = 'PawnShop' .. key,
+                        label = 'PawnShop ' .. key,
                         distance = value.distance
                     }
                 }
@@ -148,7 +148,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
 end)
 
 RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
-    lib.callback('qb-pawnshop:server:getInv', 100, function(inventory)
+    lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
         local PlyInv = inventory
         local pawnMenu = {}
 
@@ -180,7 +180,7 @@ RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
 end)
 
 RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
-    lib.callback('qb-pawnshop:server:getInv', 100, function(inventory)
+    lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
         local PlyInv = inventory
         local meltMenu = {}
 
@@ -221,7 +221,7 @@ RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
         }
     })
     if sellingItem then
-        if not sellingItem[1] then return end
+        if not sellingItem[1] or sellingItem[1] <= 0 then return end
         TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1], item.price)
     else
         QBCore.Functions.Notify(Lang:t('error.negative'), 'error')
@@ -237,7 +237,7 @@ RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
         }
     })
     if meltingItem then
-        if not meltingItem[1] then return end
+        if not meltingItem[1] or meltingItem[1] <= 0 then return end
         TriggerServerEvent('qb-pawnshop:server:meltItemRemove', item.name, meltingItem[1], item)
     else
         QBCore.Functions.Notify(Lang:t('error.no_melt'), 'error')
