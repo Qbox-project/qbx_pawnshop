@@ -1,11 +1,13 @@
 fx_version 'cerulean'
 game 'gta5'
 
+description 'QBX-Pawnshop'
+repository 'https://github.com/Qbox-project/qbx_pawnshop'
 version '1.0.0'
-repository 'https://github.com/Qbox-project/qb-pawnshop'
 
 shared_scripts {
-    '@qb-core/shared/locale.lua',
+    '@qbx_core/import.lua',
+    '@qbx_core/shared/locale.lua',
     'config.lua',
     'locales/en.lua',
     'locales/*.lua',
@@ -20,3 +22,4 @@ server_scripts {
 client_script 'client/main.lua'
 
 lua54 'yes'
+use_experimental_fxv2_oal 'yes'

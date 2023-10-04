@@ -1,4 +1,3 @@
-local QBCore = exports['qbx-core']:GetCoreObject()
 local isMelting = false
 local canTake = false
 local meltTime
@@ -106,7 +105,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             })
             lib.showContext('open_pawnShop')
         else
-            QBCore.Functions.Notify(Lang:t('info.pawn_closed', { value = Config.TimeOpen, value2 = Config.TimeClosed }))
+            exports.qbx_core:Notify(Lang:t('info.pawn_closed', { value = Config.TimeOpen, value2 = Config.TimeClosed }))
         end
     else
         local pawnShop = {
@@ -156,11 +155,11 @@ RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
             for i = 1, #data.items do
                 if v.name == data.items[i].item then
                     pawnMenu[#pawnMenu + 1] = {
-                        title = QBCore.Shared.Items[v.name].label,
+                        title = exports.ox_inventory:Items()[v.name].label,
                         description = Lang:t('info.sell_items', { value = data.items[i].price }),
                         event = 'qb-pawnshop:client:pawnitems',
                         args = {
-                            label = QBCore.Shared.Items[v.name].label,
+                            label = exports.ox_inventory:Items()[v.name].label,
                             price = data.items[i].price,
                             name = v.name,
                             amount = v.amount
@@ -188,11 +187,11 @@ RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
             for i = 1, #data.items do
                 if v.name == data.items[i].item then
                     meltMenu[#meltMenu + 1] = {
-                        title = QBCore.Shared.Items[v.name].label,
-                        description = Lang:t('info.melt_item', { value = QBCore.Shared.Items[v.name].label }),
+                        title = exports.ox_inventory:Items()[v.name].label,
+                        description = Lang:t('info.melt_item', { value = exports.ox_inventory:Items()[v.name].label }),
                         event = 'qb-pawnshop:client:meltItems',
                         args = {
-                            label = QBCore.Shared.Items[v.name].label,
+                            label = exports.ox_inventory:Items()[v.name].label,
                             reward = data.items[i].rewards,
                             name = v.name,
                             amount = v.amount,
@@ -224,7 +223,7 @@ RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
         if not sellingItem[1] or sellingItem[1] <= 0 then return end
         TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1], item.price)
     else
-        QBCore.Functions.Notify(Lang:t('error.negative'), 'error')
+        exports.qbx_core:Notify(Lang:t('error.negative'), 'error')
     end
 end)
 
@@ -240,7 +239,7 @@ RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
         if not meltingItem[1] or meltingItem[1] <= 0 then return end
         TriggerServerEvent('qb-pawnshop:server:meltItemRemove', item.name, meltingItem[1], item)
     else
-        QBCore.Functions.Notify(Lang:t('error.no_melt'), 'error')
+        exports.qbx_core:Notify(Lang:t('error.no_melt'), 'error')
     end
 end)
 
@@ -265,7 +264,7 @@ RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount
                                 button = {}
                             })
                         else
-                            QBCore.Functions.Notify(Lang:t('info.message'), 'success')
+                            exports.qbx_core:Notify(Lang:t('info.message'), 'success')
                         end
                     end
                 else

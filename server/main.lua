@@ -1,12 +1,10 @@
-local QBCore = exports['qbx-core']:GetCoreObject()
-
 local function exploitBan(id, reason)
     MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)',
         {
             GetPlayerName(id),
-            QBCore.Functions.GetIdentifier(id, 'license'),
-            QBCore.Functions.GetIdentifier(id, 'discord'),
-            QBCore.Functions.GetIdentifier(id, 'ip'),
+            GetPlayerIdentifierByType(id, 'license'),
+            GetPlayerIdentifierByType(id, 'discord'),
+            GetPlayerIdentifierByType(id, 'ip'),
             reason,
             2147483647,
             'qb-pawnshop'
@@ -18,7 +16,7 @@ end
 
 RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmount, itemPrice)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     local totalPrice = (tonumber(itemAmount) * itemPrice)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
     local dist
@@ -36,30 +34,30 @@ RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmou
         else
             Player.Functions.AddMoney('cash', totalPrice)
         end
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('success.sold', { value = tonumber(itemAmount), value2 = QBCore.Shared.Items[itemName].label, value3 = totalPrice }), 'success')
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[itemName], 'remove')
+        exports.qbx_core:Notify(src, Lang:t('success.sold', { value = tonumber(itemAmount), value2 = exports.ox_inventory:Items()[itemName].label, value3 = totalPrice }), 'success')
+        TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[itemName], 'remove')
     else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_items'), 'error')
+        exports.qbx_core:Notify(src, Lang:t('error.no_items'), 'error')
     end
     TriggerClientEvent('qb-pawnshop:client:openMenu', src)
 end)
 
 RegisterNetEvent('qb-pawnshop:server:meltItemRemove', function(itemName, itemAmount, item)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     if Player.Functions.RemoveItem(itemName, itemAmount) then
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[itemName], 'remove')
+        TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[itemName], 'remove')
         local meltTime = (tonumber(itemAmount) * item.time)
         TriggerClientEvent('qb-pawnshop:client:startMelting', src, item, itemAmount, (meltTime * 60000 / 1000))
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('info.melt_wait', { value = meltTime }), 'primary')
+        exports.qbx_core:Notify(src, Lang:t('info.melt_wait', { value = meltTime }), 'primary')
     else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.no_items'), 'error')
+        exports.qbx_core:Notify(src, Lang:t('error.no_items'), 'error')
     end
 end)
 
 RegisterNetEvent('qb-pawnshop:server:pickupMelted', function(item)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
     local dist
     for _, value in pairs(Config.PawnLocation) do
@@ -75,8 +73,8 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function(item)
         for _, m in pairs(v.item.reward) do
             local rewardAmount = m.amount
             if Player.Functions.AddItem(m.item, (meltedAmount * rewardAmount)) then
-                TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[m.item], 'add')
-                TriggerClientEvent('QBCore:Notify', src, Lang:t('success.items_received', { value = (meltedAmount * rewardAmount), value2 = QBCore.Shared.Items[m.item].label }), 'success')
+                TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[m.item], 'add')
+                exports.qbx_core:Notify(src, Lang:t('success.items_received', { value = (meltedAmount * rewardAmount), value2 = exports.ox_inventory:Items()[m.item].label }), 'success')
             else
                 TriggerClientEvent('qb-pawnshop:client:openMenu', src)
                 return
@@ -88,7 +86,7 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function(item)
 end)
 
 lib.callback.register('qb-pawnshop:server:getInv', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     local inventory = Player.PlayerData.items
     return inventory
 end)
