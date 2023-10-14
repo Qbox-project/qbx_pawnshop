@@ -32,3 +32,4 @@ Lang = Lang or Locale:new({
     phrases = Translations,
     warnOnMissing = true
 })
+--translate by stepan_valic
