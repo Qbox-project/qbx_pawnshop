@@ -1,10 +1,12 @@
+local config = require 'config.client'
+local sharedConfig = require 'config.shared'
 local isMelting = false
 local canTake = false
 local meltTime
 local meltedItem = {}
 
 CreateThread(function()
-    for _, value in pairs(Config.PawnLocation) do
+    for _, value in pairs(sharedConfig.pawnLocation) do
         local blip = AddBlipForCoord(value.coords.x, value.coords.y, value.coords.z)
         SetBlipSprite(blip, 431)
         SetBlipDisplay(blip, 4)
@@ -18,8 +20,8 @@ CreateThread(function()
 end)
 
 CreateThread(function()
-    if Config.UseTarget then
-        for key, value in pairs(Config.PawnLocation) do
+    if config.useTarget then
+        for key, value in pairs(sharedConfig.pawnLocation) do
             exports.ox_target:addBoxZone({
                 coords = value.coords,
                 size = value.size,
@@ -38,7 +40,7 @@ CreateThread(function()
         end
     else
         local zone = {}
-        for key, value in pairs(Config.PawnLocation) do
+        for key, value in pairs(sharedConfig.pawnLocation) do
             zone[#zone + 1] = lib.zones.box({
                 name = 'PawnShop' .. key,
                 coords = value.coords,
@@ -67,15 +69,15 @@ CreateThread(function()
 end)
 
 RegisterNetEvent('qb-pawnshop:client:openMenu', function()
-    if Config.UseTimes then
-        if GetClockHours() >= Config.TimeOpen and GetClockHours() <= Config.TimeClosed then
+    if config.useTimes then
+        if GetClockHours() >= config.timeOpen and GetClockHours() <= config.timeClosed then
             local pawnShop = {
                 {
                     title = Lang:t('info.sell'),
                     description = Lang:t('info.sell_pawn'),
                     event = 'qb-pawnshop:client:openPawn',
                     args = {
-                        items = Config.PawnItems
+                        items = config.pawnItems
                     }
                 }
             }
@@ -85,7 +87,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                     description = Lang:t('info.melt_pawn'),
                     event = 'qb-pawnshop:client:openMelt',
                     args = {
-                        items = Config.MeltingItems
+                        items = config.meltingItems
                     }
                 }
             end
@@ -105,7 +107,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             })
             lib.showContext('open_pawnShop')
         else
-            exports.qbx_core:Notify(Lang:t('info.pawn_closed', { value = Config.TimeOpen, value2 = Config.TimeClosed }))
+            exports.qbx_core:Notify(Lang:t('info.pawn_closed', { value = config.timeOpen, value2 = config.timeClosed }))
         end
     else
         local pawnShop = {
@@ -114,7 +116,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 description = Lang:t('info.sell_pawn'),
                 event = 'qb-pawnshop:client:openPawn',
                 args = {
-                    items = Config.PawnItems
+                    items = config.pawnItems
                 }
             }
         }
@@ -124,7 +126,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 description = Lang:t('info.melt_pawn'),
                 event = 'qb-pawnshop:client:openMelt',
                 args = {
-                    items = Config.MeltingItems
+                    items = config.meltingItems
                 }
             }
         end
@@ -256,7 +258,7 @@ RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount
                         canTake = true
                         isMelting = false
                         table.insert(meltedItem, { item = item, amount = meltingAmount })
-                        if Config.SendMeltingEmail then
+                        if config.sendMeltingEmail then
                             TriggerServerEvent('qb-phone:server:sendNewMail', {
                                 sender = Lang:t('info.title'),
                                 subject = Lang:t('info.subject'),

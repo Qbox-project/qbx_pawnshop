@@ -1,3 +1,6 @@
+local config = require 'config.server'
+local sharedConfig = require 'config.shared'
+
 local function exploitBan(id, reason)
     MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)',
         {
@@ -20,7 +23,7 @@ RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmou
     local totalPrice = (tonumber(itemAmount) * itemPrice)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
     local dist
-    for _, value in pairs(Config.PawnLocation) do
+    for _, value in pairs(sharedConfig.pawnLocation) do
         dist = #(playerCoords - value.coords)
         if #(playerCoords - value.coords) < 2 then
             dist = #(playerCoords - value.coords)
@@ -29,7 +32,7 @@ RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmou
     end
     if dist > 5 then exploitBan(src, 'sellPawnItems Exploiting') return end
     if Player.Functions.RemoveItem(itemName, tonumber(itemAmount)) then
-        if Config.BankMoney then
+        if config.bankMoney then
             Player.Functions.AddMoney('bank', totalPrice)
         else
             Player.Functions.AddMoney('cash', totalPrice)
@@ -60,7 +63,7 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function(item)
     local Player = exports.qbx_core:GetPlayer(src)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
     local dist
-    for _, value in pairs(Config.PawnLocation) do
+    for _, value in pairs(sharedConfig.pawnLocation) do
         dist = #(playerCoords - value.coords)
         if #(playerCoords - value.coords) < 2 then
             dist = #(playerCoords - value.coords)
