@@ -28,8 +28,10 @@ local Translations = {
     }
 }
 
-Lang = Lang or Locale:new({
-    phrases = Translations,
-    warnOnMissing = true
-})
---translate by stepan_valic
+if GetConvar('qb_locale', 'en') == 'cs' then
+    Lang = Locale:new({
+        phrases = Translations,
+        warnOnMissing = true,
+        fallbackLang = Lang,
+    })
+end
