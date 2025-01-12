@@ -6,7 +6,6 @@ local sharedConfig = require 'config.shared'
 local isMelting = false ---@type boolean
 local canTake = false ---@type boolean
 local meltTimeSeconds = 0 ---@type number
-local meltedItem = {} ---@type {itemName: string, amount:number}
 
 ---@param id number
 ---@param shopConfig {coords: vector3, size: vector3, heading: number, debugPoly: boolean, distance: number}
@@ -97,10 +96,6 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             pawnShop[#pawnShop + 1] = {
                 title = locale('info.melt_pickup'),
                 serverEvent = 'qb-pawnshop:server:pickupMelted',
-                args = {
-                    itemName = meltedItem.itemName,
-                    amount = meltedItem.amount
-                }
             }
         end
         lib.registerContext({
@@ -142,10 +137,6 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
         pawnShop[#pawnShop + 1] = {
             title = locale('info.melt_pickup'),
             serverEvent = 'qb-pawnshop:server:pickupMelted',
-            args = {
-                itemName = meltedItem.itemName,
-                amount = meltedItem.amount
-            }
         }
     end
     lib.registerContext({
@@ -165,7 +156,6 @@ RegisterNetEvent('qb-pawnshop:client:startMelting', function(itemName, meltingAm
 
     isMelting = true
     meltTimeSeconds = _meltTimeSeconds
-    meltedItem = {}
     CreateThread(function()
         while isMelting and LocalPlayer.state.isLoggedIn and meltTimeSeconds > 0 do
             meltTimeSeconds = meltTimeSeconds - 1
@@ -174,7 +164,6 @@ RegisterNetEvent('qb-pawnshop:client:startMelting', function(itemName, meltingAm
 
         canTake = true
         isMelting = false
-        meltedItem = { itemName = itemName, amount = meltingAmount }
 
         if not config.sendMeltingEmail then
             exports.qbx_core:Notify(locale('info.message'), 'success')
@@ -245,7 +234,6 @@ end)
 
 ---@param item {name: string, amount: number}
 RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
-    print(item.name, item.amount)
     local input = lib.inputDialog(locale('info.melt'), {
         {
             type = 'number',
