@@ -38,7 +38,7 @@ local function getClosestPawnShopDistance(src)
 end
 
 ---@param itemName string
----@return {item: string, price: number}?
+---@return PawnItem?
 local function getPawnShopItemFromName(itemName)
     for _, pawnItem in pairs(sharedConfig.pawnItems) do
         if itemName == pawnItem.item then
