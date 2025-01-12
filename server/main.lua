@@ -111,7 +111,7 @@ RegisterNetEvent('qb-pawnshop:server:meltItemRemove', function(itemName, itemAmo
     local meltTime = (itemAmount * meltingItem.meltTime)
     playersMelting[src] = { itemName = itemName, amount = itemAmount, endTime = os.time() + (meltTime * 60) }
 
-    TriggerClientEvent('qb-pawnshop:client:startMelting', src, meltingItem.item, itemAmount, (meltTime * 60000 / 1000))
+    TriggerClientEvent('qb-pawnshop:client:startMelting', src, (meltTime * 60000 / 1000))
     exports.qbx_core:Notify(src, locale('info.melt_wait', meltTime), 'primary')
 end)
 

@@ -149,7 +149,7 @@ end)
 
 ---@param meltingAmount number
 ---@param _meltTimeSeconds number
-RegisterNetEvent('qb-pawnshop:client:startMelting', function(itemName, meltingAmount, _meltTimeSeconds)
+RegisterNetEvent('qb-pawnshop:client:startMelting', function(_meltTimeSeconds)
     if isMelting then
         return
     end
