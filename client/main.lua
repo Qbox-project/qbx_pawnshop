@@ -153,6 +153,9 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
     lib.showContext('open_pawnShop')
 end)
 
+---@param item string
+---@param meltingAmount number
+---@param _meltTimeSeconds number
 RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount, _meltTimeSeconds)
     if isMelting then
         return
