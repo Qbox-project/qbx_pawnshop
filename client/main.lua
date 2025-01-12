@@ -109,7 +109,8 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
         return
     end
 
-    if GetClockHours() < config.timeOpen or GetClockHours() > config.timeClosed then
+    local gameHour = GetClockHours()
+    if gameHour < config.timeOpen or gameHour > config.timeClosed then
         exports.qbx_core:Notify(locale('info.pawn_closed', config.timeOpen, config.timeClosed))
         return
     end
