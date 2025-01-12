@@ -1,6 +1,8 @@
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 
+---@param id string
+---@param reason string
 local function exploitBan(id, reason)
     MySQL.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)',
         {
@@ -17,12 +19,12 @@ local function exploitBan(id, reason)
     DropPlayer(id, 'You were permanently banned by the server for: Exploiting')
 end
 
-RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmount, itemPrice)
-    local src = source
-    local Player = exports.qbx_core:GetPlayer(src)
-    local totalPrice = (tonumber(itemAmount) * itemPrice)
+---@param src number
+---@return number
+local function getClosestPawnShopDistance(src)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
     local dist
+
     for _, value in pairs(sharedConfig.pawnLocation) do
         dist = #(playerCoords - value.coords)
         if #(playerCoords - value.coords) < 2 then
@@ -30,7 +32,17 @@ RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmou
             break
         end
     end
-    if dist > 5 then exploitBan(src, 'sellPawnItems Exploiting') return end
+
+    return dist
+end
+
+RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmount, itemPrice)
+    local src = source
+    local Player = exports.qbx_core:GetPlayer(src)
+    local totalPrice = (tonumber(itemAmount) * itemPrice)
+
+    if getClosestPawnShopDistance(src) > 5 then exploitBan(src, 'sellPawnItems Exploiting') return end
+
     if Player.Functions.RemoveItem(itemName, tonumber(itemAmount)) then
         if config.bankMoney then
             Player.Functions.AddMoney('bank', totalPrice)
@@ -61,16 +73,9 @@ end)
 RegisterNetEvent('qb-pawnshop:server:pickupMelted', function(item)
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
-    local playerCoords = GetEntityCoords(GetPlayerPed(src))
-    local dist
-    for _, value in pairs(sharedConfig.pawnLocation) do
-        dist = #(playerCoords - value.coords)
-        if #(playerCoords - value.coords) < 2 then
-            dist = #(playerCoords - value.coords)
-            break
-        end
-    end
-    if dist > 5 then exploitBan(src, 'pickupMelted Exploiting') return end
+
+    if getClosestPawnShopDistance(src) > 5 then exploitBan(src, 'pickupMelted Exploiting') return end
+
     for _, v in pairs(item.items) do
         local meltedAmount = v.amount
         for _, m in pairs(v.item.reward) do
