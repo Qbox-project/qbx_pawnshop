@@ -81,14 +81,15 @@ end)
 RegisterNetEvent('qb-pawnshop:server:meltItemRemove', function(itemName, itemAmount, item)
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
-    if Player.Functions.RemoveItem(itemName, itemAmount) then
-        TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[itemName], 'remove')
-        local meltTime = (tonumber(itemAmount) * item.time)
-        TriggerClientEvent('qb-pawnshop:client:startMelting', src, item, itemAmount, (meltTime * 60000 / 1000))
-        exports.qbx_core:Notify(src, locale('info.melt_wait', meltTime ), 'primary')
-    else
+    if not Player.Functions.RemoveItem(itemName, itemAmount) then
         exports.qbx_core:Notify(src, locale('error.no_items'), 'error')
+        return
     end
+
+    TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[itemName], 'remove')
+    local meltTime = (tonumber(itemAmount) * item.time)
+    TriggerClientEvent('qb-pawnshop:client:startMelting', src, item, itemAmount, (meltTime * 60000 / 1000))
+    exports.qbx_core:Notify(src, locale('info.melt_wait', meltTime ), 'primary')
 end)
 
 RegisterNetEvent('qb-pawnshop:server:pickupMelted', function(item)
