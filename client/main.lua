@@ -191,6 +191,7 @@ RegisterNetEvent('qb-pawnshop:client:resetPickup', function()
     canTake = false
 end)
 
+---@param data {items: {item: string, rewards: {item: string, amount: number}[], meltTime: number}[]}
 RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
 	lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
 		local PlyInv = inventory
@@ -224,6 +225,7 @@ RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
 	end)
 end)
 
+---@param item {label: string, price: number, name: string, amount: number}
 RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
 	local sellingItem = lib.inputDialog(locale('info.title'), {
 		{
@@ -240,6 +242,7 @@ RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
 	end
 end)
 
+---@param item {label: string, reward: {item: string, amount: number}[], name: string, amount: number, time: number}
 RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
 	local meltingItem = lib.inputDialog(locale('info.melt'), {
 		{
@@ -256,6 +259,7 @@ RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
 	end
 end)
 
+---@param data {items: {item: string, price: number}[]}
 RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
 	lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
 		local PlyInv = inventory
