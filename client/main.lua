@@ -1,9 +1,9 @@
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
-local isMelting = false
-local canTake = false
-local meltTime
-local meltedItem = {}
+local isMelting = false ---@type boolean
+local canTake = false ---@type boolean
+local meltTime = 0 ---@type number
+local meltedItem = {} ---@type {item: string, amount: number}[]
 
 CreateThread(function()
     for _, value in pairs(sharedConfig.pawnLocation) do
