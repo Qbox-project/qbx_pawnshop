@@ -1,11 +1,12 @@
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 
+---@alias PawnItem {item: string, price: number}
 ---@alias MeltingItem {item: string, rewards: {item: string, amount: number}[], meltTime: number}
 local isMelting = false ---@type boolean
 local canTake = false ---@type boolean
 local meltTimeSeconds = 0 ---@type number
-local meltedItem = {} ---@type {item: MeltingItem, amount: number, amount: number}
+local meltedItem = {} ---@type {itemName: string, amount:number}
 
 ---@param id number
 ---@param shopConfig {coords: vector3, size: vector3, heading: number, debugPoly: boolean, distance: number}
@@ -78,7 +79,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 description = locale('info.sell_pawn'),
                 event = 'qb-pawnshop:client:openPawn',
                 args = {
-                    items = sharedConfig.pawnItems
+                    pawnItems = sharedConfig.pawnItems
                 }
             }
         }
@@ -88,7 +89,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 description = locale('info.melt_pawn'),
                 event = 'qb-pawnshop:client:openMelt',
                 args = {
-                    items = sharedConfig.meltingItems
+                    meltingItems = sharedConfig.meltingItems
                 }
             }
         end
@@ -97,7 +98,8 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 title = locale('info.melt_pickup'),
                 serverEvent = 'qb-pawnshop:server:pickupMelted',
                 args = {
-                    items = meltedItem
+                    itemName = meltedItem.itemName,
+                    amount = meltedItem.amount
                 }
             }
         end
@@ -122,7 +124,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             description = locale('info.sell_pawn'),
             event = 'qb-pawnshop:client:openPawn',
             args = {
-                items = sharedConfig.pawnItems
+                pawnItems = sharedConfig.pawnItems
             }
         }
     }
@@ -132,7 +134,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             description = locale('info.melt_pawn'),
             event = 'qb-pawnshop:client:openMelt',
             args = {
-                items = sharedConfig.meltingItems
+                meltingItems = sharedConfig.meltingItems
             }
         }
     end
@@ -141,7 +143,8 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             title = locale('info.melt_pickup'),
             serverEvent = 'qb-pawnshop:server:pickupMelted',
             args = {
-                items = meltedItem
+                itemName = meltedItem.itemName,
+                amount = meltedItem.amount
             }
         }
     end
@@ -153,10 +156,9 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
     lib.showContext('open_pawnShop')
 end)
 
----@param item MeltingItem
 ---@param meltingAmount number
 ---@param _meltTimeSeconds number
-RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount, _meltTimeSeconds)
+RegisterNetEvent('qb-pawnshop:client:startMelting', function(itemName, meltingAmount, _meltTimeSeconds)
     if isMelting then
         return
     end
@@ -172,7 +174,7 @@ RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount
 
         canTake = true
         isMelting = false
-        meltedItem = { item = item, amount = meltingAmount }
+        meltedItem = { itemName = itemName, amount = meltingAmount }
 
         if not config.sendMeltingEmail then
             exports.qbx_core:Notify(locale('info.message'), 'success')
@@ -192,25 +194,22 @@ RegisterNetEvent('qb-pawnshop:client:resetPickup', function()
     canTake = false
 end)
 
----@param data {items: MeltingItem}
+---@param data {meltingItems: MeltingItem[]}
 RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
     lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
         local playerInv = inventory
         local meltMenu = {}
 
         for _, v in pairs(playerInv) do
-            for i = 1, #data.items do
-                if v.name == data.items[i].item then
+            for i = 1, #data.meltingItems do
+                if v.name == data.meltingItems[i].item then
                     meltMenu[#meltMenu + 1] = {
                         title = exports.ox_inventory:Items()[v.name].label,
                         description = locale('info.melt_item', exports.ox_inventory:Items()[v.name].label),
                         event = 'qb-pawnshop:client:meltItems',
                         args = {
-                            label = exports.ox_inventory:Items()[v.name].label,
-                            reward = data.items[i].rewards,
                             name = v.name,
-                            amount = v.amount,
-                            time = data.items[i].meltTime
+                            amount = v.count,
                         }
                     }
                 end
@@ -226,7 +225,7 @@ RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
     end)
 end)
 
----@param item {label: string, price: number, name: string, amount: number}
+---@param item {name: string, amount: number}
 RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
     local sellingItem = lib.inputDialog(locale('info.title'), {
         {
@@ -244,40 +243,39 @@ RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
     TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1])
 end)
 
----@param item {label: string, reward: {item: string, amount: number}[], name: string, amount: number, time: number}
+---@param item {name: string, amount: number}
 RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
-    local meltingItem = lib.inputDialog(locale('info.melt'), {
+    print(item.name, item.amount)
+    local input = lib.inputDialog(locale('info.melt'), {
         {
             type = 'number',
             label = 'amount',
             placeholder = locale('info.max', item.amount)
         }
     })
-    if not meltingItem then
+    if not input then
         exports.qbx_core:Notify(locale('error.no_melt'), 'error')
         return
     end
-    if not meltingItem[1] or meltingItem[1] <= 0 then return end
+    if not input[1] or input[1] <= 0 then return end
 
-    TriggerServerEvent('qb-pawnshop:server:meltItemRemove', item.name, meltingItem[1], item)
+    TriggerServerEvent('qb-pawnshop:server:meltItemRemove', item.name, input[1])
 end)
 
----@param data {items: {item: string, price: number}[]}
+---@param data {pawnItems: PawnItem[]}
 RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
     lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
-        local PlyInv = inventory
+        local plyInv = inventory
         local pawnMenu = {}
 
-        for _, v in pairs(PlyInv) do
-            for i = 1, #data.items do
-                if v.name == data.items[i].item then
+        for _, v in pairs(plyInv) do
+            for i = 1, #data.pawnItems do
+                if v.name == data.pawnItems[i].item then
                     pawnMenu[#pawnMenu + 1] = {
                         title = exports.ox_inventory:Items()[v.name].label,
-                        description = locale('info.sell_items', data.items[i].price),
+                        description = locale('info.sell_items', data.pawnItems[i].price),
                         event = 'qb-pawnshop:client:pawnitems',
                         args = {
-                            label = exports.ox_inventory:Items()[v.name].label,
-                            price = data.items[i].price,
                             name = v.name,
                             amount = v.amount
                         }
