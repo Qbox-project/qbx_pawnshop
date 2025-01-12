@@ -1,10 +1,11 @@
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 
+---@alias MeltingItem {item: string, rewards: {item: string, amount: number}[], meltTime: number}
 local isMelting = false ---@type boolean
 local canTake = false ---@type boolean
 local meltTimeSeconds = 0 ---@type number
-local meltedItem = {} ---@type {item: string, amount: number}[]
+local meltedItem = {} ---@type {item: MeltingItem, amount: number, amount: number}
 
 ---@param id number
 ---@param shopConfig {coords: vector3, size: vector3, heading: number, debugPoly: boolean, distance: number}
@@ -152,7 +153,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
     lib.showContext('open_pawnShop')
 end)
 
----@param item string
+---@param item MeltingItem
 ---@param meltingAmount number
 ---@param _meltTimeSeconds number
 RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount, _meltTimeSeconds)
@@ -171,7 +172,7 @@ RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount
 
         canTake = true
         isMelting = false
-        table.insert(meltedItem, { item = item, amount = meltingAmount })
+        meltedItem = { item = item, amount = meltingAmount }
 
         if not config.sendMeltingEmail then
             exports.qbx_core:Notify(locale('info.message'), 'success')
@@ -191,103 +192,105 @@ RegisterNetEvent('qb-pawnshop:client:resetPickup', function()
     canTake = false
 end)
 
----@param data {items: {item: string, rewards: {item: string, amount: number}[], meltTime: number}[]}
+---@param data {items: MeltingItem}
 RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
-	lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
-		local PlyInv = inventory
-		local meltMenu = {}
+    lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
+        local playerInv = inventory
+        local meltMenu = {}
 
-		for _, v in pairs(PlyInv) do
-			for i = 1, #data.items do
-				if v.name == data.items[i].item then
-					meltMenu[#meltMenu + 1] = {
-						title = exports.ox_inventory:Items()[v.name].label,
-						description = locale('info.melt_item', exports.ox_inventory:Items()[v.name].label),
-						event = 'qb-pawnshop:client:meltItems',
-						args = {
-							label = exports.ox_inventory:Items()[v.name].label,
-							reward = data.items[i].rewards,
-							name = v.name,
-							amount = v.amount,
-							time = data.items[i].meltTime
-						}
-					}
-				end
-			end
-		end
-		lib.registerContext({
-			id = 'open_meltMenu',
-			menu = 'open_pawnShop',
-			title = locale('info.title'),
-			options = meltMenu
-		})
-		lib.showContext('open_meltMenu')
-	end)
+        for _, v in pairs(playerInv) do
+            for i = 1, #data.items do
+                if v.name == data.items[i].item then
+                    meltMenu[#meltMenu + 1] = {
+                        title = exports.ox_inventory:Items()[v.name].label,
+                        description = locale('info.melt_item', exports.ox_inventory:Items()[v.name].label),
+                        event = 'qb-pawnshop:client:meltItems',
+                        args = {
+                            label = exports.ox_inventory:Items()[v.name].label,
+                            reward = data.items[i].rewards,
+                            name = v.name,
+                            amount = v.amount,
+                            time = data.items[i].meltTime
+                        }
+                    }
+                end
+            end
+        end
+        lib.registerContext({
+            id = 'open_meltMenu',
+            menu = 'open_pawnShop',
+            title = locale('info.title'),
+            options = meltMenu
+        })
+        lib.showContext('open_meltMenu')
+    end)
 end)
 
 ---@param item {label: string, price: number, name: string, amount: number}
 RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
-	local sellingItem = lib.inputDialog(locale('info.title'), {
-		{
-			type = 'number',
-			label = 'amount',
-			placeholder = locale('info.max', item.amount)
-		}
-	})
-	if sellingItem then
-		if not sellingItem[1] or sellingItem[1] <= 0 then return end
-		TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1])
-	else
-		exports.qbx_core:Notify(locale('error.negative'), 'error')
-	end
+    local sellingItem = lib.inputDialog(locale('info.title'), {
+        {
+            type = 'number',
+            label = 'amount',
+            placeholder = locale('info.max', item.amount)
+        }
+    })
+    if not sellingItem then
+        exports.qbx_core:Notify(locale('error.negative'), 'error')
+        return
+    end
+
+    if not sellingItem[1] or sellingItem[1] <= 0 then return end
+    TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1])
 end)
 
 ---@param item {label: string, reward: {item: string, amount: number}[], name: string, amount: number, time: number}
 RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
-	local meltingItem = lib.inputDialog(locale('info.melt'), {
-		{
-			type = 'number',
-			label = 'amount',
-			placeholder = locale('info.max', item.amount)
-		}
-	})
-	if meltingItem then
-		if not meltingItem[1] or meltingItem[1] <= 0 then return end
-		TriggerServerEvent('qb-pawnshop:server:meltItemRemove', item.name, meltingItem[1], item)
-	else
-		exports.qbx_core:Notify(locale('error.no_melt'), 'error')
-	end
+    local meltingItem = lib.inputDialog(locale('info.melt'), {
+        {
+            type = 'number',
+            label = 'amount',
+            placeholder = locale('info.max', item.amount)
+        }
+    })
+    if not meltingItem then
+        exports.qbx_core:Notify(locale('error.no_melt'), 'error')
+        return
+    end
+    if not meltingItem[1] or meltingItem[1] <= 0 then return end
+
+    TriggerServerEvent('qb-pawnshop:server:meltItemRemove', item.name, meltingItem[1], item)
 end)
 
 ---@param data {items: {item: string, price: number}[]}
 RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
-	lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
-		local PlyInv = inventory
-		local pawnMenu = {}
+    lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
+        local PlyInv = inventory
+        local pawnMenu = {}
 
-		for _, v in pairs(PlyInv) do
-			for i = 1, #data.items do
-				if v.name == data.items[i].item then
-					pawnMenu[#pawnMenu + 1] = {
-						title = exports.ox_inventory:Items()[v.name].label,
-						description = locale('info.sell_items', data.items[i].price),
-						event = 'qb-pawnshop:client:pawnitems',
-						args = {
-							label = exports.ox_inventory:Items()[v.name].label,
-							price = data.items[i].price,
-							name = v.name,
-							amount = v.amount
-						}
-					}
-				end
-			end
-		end
-		lib.registerContext({
-			id = 'open_pawnMenu',
-			menu = 'open_pawnShop',
-			title = locale('info.title'),
-			options = pawnMenu
-		})
-		lib.showContext('open_pawnMenu')
-	end)
+        for _, v in pairs(PlyInv) do
+            for i = 1, #data.items do
+                if v.name == data.items[i].item then
+                    pawnMenu[#pawnMenu + 1] = {
+                        title = exports.ox_inventory:Items()[v.name].label,
+                        description = locale('info.sell_items', data.items[i].price),
+                        event = 'qb-pawnshop:client:pawnitems',
+                        args = {
+                            label = exports.ox_inventory:Items()[v.name].label,
+                            price = data.items[i].price,
+                            name = v.name,
+                            amount = v.amount
+                        }
+                    }
+                end
+            end
+        end
+        lib.registerContext({
+            id = 'open_pawnMenu',
+            menu = 'open_pawnShop',
+            title = locale('info.title'),
+            options = pawnMenu
+        })
+        lib.showContext('open_pawnMenu')
+    end)
 end)
