@@ -236,7 +236,7 @@ RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
 	})
 	if sellingItem then
 		if not sellingItem[1] or sellingItem[1] <= 0 then return end
-		TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1], item.price)
+		TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1])
 	else
 		exports.qbx_core:Notify(locale('error.negative'), 'error')
 	end
