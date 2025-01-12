@@ -36,14 +36,35 @@ local function getClosestPawnShopDistance(src)
     return dist
 end
 
-RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmount, itemPrice)
+---@param itemName string
+---@return {item: string, price: number}?
+local function getPawnShopItemFromName(itemName)
+    for _, pawnItem in pairs(sharedConfig.pawnItems) do
+        if itemName == pawnItem.item then
+            return pawnItem
+        end
+    end
+end
+
+---@param itemName string
+---@param itemAmount number
+RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmount)
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
-    local totalPrice = (tonumber(itemAmount) * itemPrice)
 
-    if getClosestPawnShopDistance(src) > 5 then exploitBan(src, 'sellPawnItems Exploiting') return end
+    if getClosestPawnShopDistance(src) > 5 then 
+        exploitBan(src, 'sellPawnItems Exploiting')
+        return
+    end
 
-    if Player.Functions.RemoveItem(itemName, tonumber(itemAmount)) then
+    local pawnItem = getPawnShopItemFromName(itemName)
+    if not pawnItem then
+        exploitBan(src, "sellPawnItems Exploiting")
+        return
+    end
+
+    local totalPrice = (itemAmount * pawnItem.price)
+    if Player.Functions.RemoveItem(itemName, itemAmount) then
         if config.bankMoney then
             Player.Functions.AddMoney('bank', totalPrice)
         else
