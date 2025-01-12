@@ -2,7 +2,7 @@ local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local isMelting = false ---@type boolean
 local canTake = false ---@type boolean
-local meltTime = 0 ---@type number
+local meltTimeSeconds = 0 ---@type number
 local meltedItem = {} ---@type {item: string, amount: number}[]
 
 CreateThread(function()
@@ -245,16 +245,16 @@ RegisterNetEvent('qb-pawnshop:client:meltItems', function(item)
     end
 end)
 
-RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount, meltTimees)
+RegisterNetEvent('qb-pawnshop:client:startMelting', function(item, meltingAmount, _meltTimeSeconds)
     if not isMelting then
         isMelting = true
-        meltTime = meltTimees
+        meltTimeSeconds = _meltTimeSeconds
         meltedItem = {}
         CreateThread(function()
             while isMelting do
                 if LocalPlayer.state.isLoggedIn then
-                    meltTime = meltTime - 1
-                    if meltTime <= 0 then
+                    meltTimeSeconds = meltTimeSeconds - 1
+                    if meltTimeSeconds <= 0 then
                         canTake = true
                         isMelting = false
                         table.insert(meltedItem, { item = item, amount = meltingAmount })
