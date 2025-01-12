@@ -147,15 +147,14 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
     lib.showContext('open_pawnShop')
 end)
 
----@param meltingAmount number
----@param _meltTimeSeconds number
-RegisterNetEvent('qb-pawnshop:client:startMelting', function(_meltTimeSeconds)
+---@param pMeltTimeSeconds number
+RegisterNetEvent('qb-pawnshop:client:startMelting', function(pMeltTimeSeconds)
     if isMelting then
         return
     end
 
     isMelting = true
-    meltTimeSeconds = _meltTimeSeconds
+    meltTimeSeconds = pMeltTimeSeconds
     CreateThread(function()
         while isMelting and LocalPlayer.state.isLoggedIn and meltTimeSeconds > 0 do
             meltTimeSeconds = meltTimeSeconds - 1

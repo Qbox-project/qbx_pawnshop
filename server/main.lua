@@ -92,7 +92,7 @@ RegisterNetEvent('qb-pawnshop:server:meltItemRemove', function(itemName, itemAmo
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
 
-    if playersMelting[src] then 
+    if playersMelting[src] then
         return
     end
 
