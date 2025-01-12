@@ -77,7 +77,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 description = locale('info.sell_pawn'),
                 event = 'qb-pawnshop:client:openPawn',
                 args = {
-                    items = config.pawnItems
+                    items = sharedConfig.pawnItems
                 }
             }
         }
@@ -87,7 +87,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
                 description = locale('info.melt_pawn'),
                 event = 'qb-pawnshop:client:openMelt',
                 args = {
-                    items = config.meltingItems
+                    items = sharedConfig.meltingItems
                 }
             }
         end
@@ -121,7 +121,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             description = locale('info.sell_pawn'),
             event = 'qb-pawnshop:client:openPawn',
             args = {
-                items = config.pawnItems
+                items = sharedConfig.pawnItems
             }
         }
     }
@@ -131,7 +131,7 @@ RegisterNetEvent('qb-pawnshop:client:openMenu', function()
             description = locale('info.melt_pawn'),
             event = 'qb-pawnshop:client:openMelt',
             args = {
-                items = config.meltingItems
+                items = sharedConfig.meltingItems
             }
         }
     end

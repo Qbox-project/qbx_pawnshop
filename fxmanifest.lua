@@ -19,7 +19,6 @@ server_scripts {
 files {
     'config/client.lua',
     'config/shared.lua',
-    'client/modules/**',
     'locales/*.json'
 }
 
