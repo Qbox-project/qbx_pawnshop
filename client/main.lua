@@ -6,7 +6,7 @@ local meltTimeSeconds = 0 ---@type number
 local meltedItem = {} ---@type {item: string, amount: number}[]
 
 CreateThread(function()
-    for _, value in pairs(sharedConfig.pawnLocation) do
+    for key, value in pairs(sharedConfig.pawnLocation) do
         local blip = AddBlipForCoord(value.coords.x, value.coords.y, value.coords.z)
         SetBlipSprite(blip, 431)
         SetBlipDisplay(blip, 4)
@@ -16,12 +16,8 @@ CreateThread(function()
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentSubstringPlayerName(locale('info.title'))
         EndTextCommandSetBlipName(blip)
-    end
-end)
 
-CreateThread(function()
-    if config.useTarget then
-        for key, value in pairs(sharedConfig.pawnLocation) do
+        if config.useTarget then
             exports.ox_target:addBoxZone({
                 coords = value.coords,
                 size = value.size,
@@ -37,11 +33,8 @@ CreateThread(function()
                     }
                 }
             })
-        end
-    else
-        local zone = {}
-        for key, value in pairs(sharedConfig.pawnLocation) do
-            zone[#zone + 1] = lib.zones.box({
+        else
+            lib.zones.box({
                 name = 'PawnShop' .. key,
                 coords = value.coords,
                 size = value.size,
