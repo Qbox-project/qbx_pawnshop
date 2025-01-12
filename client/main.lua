@@ -10,23 +10,7 @@ local meltedItem = {} ---@type {item: string, amount: number}[]
 ---@param id number
 ---@param shopConfig {coords: vector3, size: vector3, heading: number, debugPoly: boolean, distance: number}
 local function addPawnShop(id, shopConfig)
-    if config.useTarget then
-        exports.ox_target:addBoxZone({
-            coords = shopConfig.coords,
-            size = shopConfig.size,
-            rotation = shopConfig.heading,
-            debug = shopConfig.debugPoly,
-            options = {
-                {
-                    name = 'PawnShop' .. id,
-                    event = 'qb-pawnshop:client:openMenu',
-                    icon = 'fas fa-ring',
-                    label = 'PawnShop ' .. id,
-                    distance = shopConfig.distance
-                }
-            }
-        })
-    else
+    if not config.useTarget then
         lib.zones.box({
             name = 'PawnShop' .. id,
             coords = shopConfig.coords,
@@ -50,7 +34,24 @@ local function addPawnShop(id, shopConfig)
                 lib.hideContext(false)
             end
         })
+        return
     end
+
+    exports.ox_target:addBoxZone({
+        coords = shopConfig.coords,
+        size = shopConfig.size,
+        rotation = shopConfig.heading,
+        debug = shopConfig.debugPoly,
+        options = {
+            {
+                name = 'PawnShop' .. id,
+                event = 'qb-pawnshop:client:openMenu',
+                icon = 'fas fa-ring',
+                label = 'PawnShop ' .. id,
+                distance = shopConfig.distance
+            }
+        }
+    })
 end
 
 CreateThread(function()
