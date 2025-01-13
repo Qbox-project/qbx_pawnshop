@@ -55,7 +55,8 @@ local function addPawnShop(id, shopConfig)
 end
 
 CreateThread(function()
-    for id, shopConfig in pairs(sharedConfig.pawnLocation) do
+    for i = 1, #sharedConfig.pawnLocation do
+        local shopConfig = sharedConfig.pawnLocation[i]
         local blip = AddBlipForCoord(shopConfig.coords.x, shopConfig.coords.y, shopConfig.coords.z)
         SetBlipSprite(blip, 431)
         SetBlipDisplay(blip, 4)
@@ -66,7 +67,7 @@ CreateThread(function()
         AddTextComponentSubstringPlayerName(locale('info.title'))
         EndTextCommandSetBlipName(blip)
 
-        addPawnShop(id, shopConfig)
+        addPawnShop(i, shopConfig)
     end
 end)
 

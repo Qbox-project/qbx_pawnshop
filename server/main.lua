@@ -26,7 +26,9 @@ local function getClosestPawnShopDistance(src)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
     local dist
 
-    for _, value in pairs(sharedConfig.pawnLocation) do
+    for i = 1, #sharedConfig.pawnLocation do
+        local value = sharedConfig.pawnLocation[i]
+
         dist = #(playerCoords - value.coords)
         if #(playerCoords - value.coords) < 2 then
             dist = #(playerCoords - value.coords)
@@ -40,7 +42,8 @@ end
 ---@param itemName string
 ---@return PawnItem?
 local function getPawnShopItemFromName(itemName)
-    for _, pawnItem in pairs(sharedConfig.pawnItems) do
+    for i = 1, #sharedConfig.pawnItems do
+        local pawnItem = sharedConfig.pawnItems[i]
         if itemName == pawnItem.item then
             return pawnItem
         end
@@ -50,7 +53,8 @@ end
 ---@param itemName string
 ---@return MeltingItem?
 local function getMeltingItemFromName(itemName)
-    for _, meltingItem in pairs(sharedConfig.meltingItems) do
+    for i = 1, #sharedConfig.meltingItems do
+        local meltingItem = sharedConfig.meltingItems[i]
         if itemName == meltingItem.item then
             return meltingItem
         end
@@ -139,7 +143,9 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
     local meltedAmount = playersMelting[src].amount
     playersMelting[src] = nil
 
-    for _, reward in pairs(meltingItem.rewards) do
+    for i = 1, #meltingItem.rewards do
+        local reward = meltingItem.rewards[i]
+
         local rewardAmount = reward.amount
         if not Player.Functions.AddItem(reward.item, (meltedAmount * rewardAmount)) then
             TriggerClientEvent('qb-pawnshop:client:openMenu', src)
