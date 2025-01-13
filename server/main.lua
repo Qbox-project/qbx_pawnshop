@@ -155,9 +155,3 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
     TriggerClientEvent('qb-pawnshop:client:resetPickup', src)
     TriggerClientEvent('qb-pawnshop:client:openMenu', src)
 end)
-
-lib.callback.register('qb-pawnshop:server:getInv', function(source)
-    local Player = exports.qbx_core:GetPlayer(source)
-    local inventory = Player.PlayerData.items
-    return inventory
-end)

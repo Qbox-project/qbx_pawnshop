@@ -185,33 +185,32 @@ end)
 
 ---@param data {meltingItems: MeltingItem[]}
 RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
-    lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
-        local playerInv = inventory
-        local meltMenu = {}
+    local inventory = exports.ox_inventory:GetPlayerItems()
+    local playerInv = inventory
+    local meltMenu = {}
 
-        for _, v in pairs(playerInv) do
-            for i = 1, #data.meltingItems do
-                if v.name == data.meltingItems[i].item then
-                    meltMenu[#meltMenu + 1] = {
-                        title = exports.ox_inventory:Items()[v.name].label,
-                        description = locale('info.melt_item', exports.ox_inventory:Items()[v.name].label),
-                        event = 'qb-pawnshop:client:meltItems',
-                        args = {
-                            name = v.name,
-                            amount = v.count,
-                        }
+    for _, v in pairs(playerInv) do
+        for i = 1, #data.meltingItems do
+            if v.name == data.meltingItems[i].item then
+                meltMenu[#meltMenu + 1] = {
+                    title = exports.ox_inventory:Items()[v.name].label,
+                    description = locale('info.melt_item', exports.ox_inventory:Items()[v.name].label),
+                    event = 'qb-pawnshop:client:meltItems',
+                    args = {
+                        name = v.name,
+                        amount = v.count,
                     }
-                end
+                }
             end
         end
-        lib.registerContext({
-            id = 'open_meltMenu',
-            menu = 'open_pawnShop',
-            title = locale('info.title'),
-            options = meltMenu
-        })
-        lib.showContext('open_meltMenu')
-    end)
+    end
+    lib.registerContext({
+        id = 'open_meltMenu',
+        menu = 'open_pawnShop',
+        title = locale('info.title'),
+        options = meltMenu
+    })
+    lib.showContext('open_meltMenu')
 end)
 
 ---@param item {name: string, amount: number}
@@ -252,31 +251,30 @@ end)
 
 ---@param data {pawnItems: PawnItem[]}
 RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
-    lib.callback('qb-pawnshop:server:getInv', false, function(inventory)
-        local plyInv = inventory
-        local pawnMenu = {}
+    local inventory = exports.ox_inventory:GetPlayerItems()
+    local plyInv = inventory
+    local pawnMenu = {}
 
-        for _, v in pairs(plyInv) do
-            for i = 1, #data.pawnItems do
-                if v.name == data.pawnItems[i].item then
-                    pawnMenu[#pawnMenu + 1] = {
-                        title = exports.ox_inventory:Items()[v.name].label,
-                        description = locale('info.sell_items', data.pawnItems[i].price),
-                        event = 'qb-pawnshop:client:pawnitems',
-                        args = {
-                            name = v.name,
-                            amount = v.amount
-                        }
+    for _, v in pairs(plyInv) do
+        for i = 1, #data.pawnItems do
+            if v.name == data.pawnItems[i].item then
+                pawnMenu[#pawnMenu + 1] = {
+                    title = exports.ox_inventory:Items()[v.name].label,
+                    description = locale('info.sell_items', data.pawnItems[i].price),
+                    event = 'qb-pawnshop:client:pawnitems',
+                    args = {
+                        name = v.name,
+                        amount = v.amount
                     }
-                end
+                }
             end
         end
-        lib.registerContext({
-            id = 'open_pawnMenu',
-            menu = 'open_pawnShop',
-            title = locale('info.title'),
-            options = pawnMenu
-        })
-        lib.showContext('open_pawnMenu')
-    end)
+    end
+    lib.registerContext({
+        id = 'open_pawnMenu',
+        menu = 'open_pawnShop',
+        title = locale('info.title'),
+        options = pawnMenu
+    })
+    lib.showContext('open_pawnMenu')
 end)
