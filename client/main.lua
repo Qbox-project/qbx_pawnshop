@@ -216,20 +216,20 @@ end)
 
 ---@param item {name: string, amount: number}
 RegisterNetEvent('qb-pawnshop:client:pawnitems', function(item)
-    local sellingItem = lib.inputDialog(locale('info.title'), {
+    local input = lib.inputDialog(locale('info.title'), {
         {
             type = 'number',
             label = 'amount',
             placeholder = locale('info.max', item.amount)
         }
     })
-    if not sellingItem then
+    if not input then
         exports.qbx_core:Notify(locale('error.negative'), 'error')
         return
     end
 
-    if not sellingItem[1] or sellingItem[1] <= 0 then return end
-    TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, sellingItem[1])
+    if not input[1] or input[1] <= 0 then return end
+    TriggerServerEvent('qb-pawnshop:server:sellPawnItems', item.name, input[1])
 end)
 
 ---@param item {name: string, amount: number}
