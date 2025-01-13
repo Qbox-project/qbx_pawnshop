@@ -186,19 +186,18 @@ end)
 ---@param data {meltingItems: MeltingItem[]}
 RegisterNetEvent('qb-pawnshop:client:openMelt', function(data)
     local inventory = exports.ox_inventory:GetPlayerItems()
-    local playerInv = inventory
     local meltMenu = {}
 
-    for _, v in pairs(playerInv) do
+    for _, invItem in pairs(inventory) do
         for i = 1, #data.meltingItems do
-            if v.name == data.meltingItems[i].item then
+            if invItem.name == data.meltingItems[i].item then
                 meltMenu[#meltMenu + 1] = {
-                    title = exports.ox_inventory:Items()[v.name].label,
-                    description = locale('info.melt_item', exports.ox_inventory:Items()[v.name].label),
+                    title = invItem.label,
+                    description = locale('info.melt_item', invItem.label),
                     event = 'qb-pawnshop:client:meltItems',
                     args = {
-                        name = v.name,
-                        amount = v.count,
+                        name = invItem.name,
+                        amount = invItem.count,
                     }
                 }
             end
@@ -252,19 +251,18 @@ end)
 ---@param data {pawnItems: PawnItem[]}
 RegisterNetEvent('qb-pawnshop:client:openPawn', function(data)
     local inventory = exports.ox_inventory:GetPlayerItems()
-    local plyInv = inventory
     local pawnMenu = {}
 
-    for _, v in pairs(plyInv) do
+    for _, invItem in pairs(inventory) do
         for i = 1, #data.pawnItems do
-            if v.name == data.pawnItems[i].item then
+            if invItem.name == data.pawnItems[i].item then
                 pawnMenu[#pawnMenu + 1] = {
-                    title = exports.ox_inventory:Items()[v.name].label,
+                    title = invItem.label,
                     description = locale('info.sell_items', data.pawnItems[i].price),
                     event = 'qb-pawnshop:client:pawnitems',
                     args = {
-                        name = v.name,
-                        amount = v.amount
+                        name = invItem.name,
+                        amount = invItem.amount
                     }
                 }
             end
