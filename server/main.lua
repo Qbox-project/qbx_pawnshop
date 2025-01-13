@@ -21,22 +21,19 @@ local function exploitBan(id, reason)
 end
 
 ---@param src number
----@return number
-local function getClosestPawnShopDistance(src)
+---@return boolean
+local function isPlayerAtPawnShop(src)
     local playerCoords = GetEntityCoords(GetPlayerPed(src))
-    local dist
 
     for i = 1, #sharedConfig.pawnLocation do
         local value = sharedConfig.pawnLocation[i]
 
-        dist = #(playerCoords - value.coords)
-        if #(playerCoords - value.coords) < 2 then
-            dist = #(playerCoords - value.coords)
-            break
+        if #(playerCoords - value.coords) <= 5 then
+            return true
         end
     end
 
-    return dist
+    return false
 end
 
 ---@param itemName string
@@ -67,7 +64,7 @@ RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmou
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
 
-    if getClosestPawnShopDistance(src) > 5 then
+    if not isPlayerAtPawnShop(src) then
         exploitBan(src, 'sellPawnItems Exploiting')
         return
     end
@@ -123,7 +120,7 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
 
-    if getClosestPawnShopDistance(src) > 5 then
+    if not isPlayerAtPawnShop(src) then
         exploitBan(src, 'pickupMelted Exploiting')
         return
     end
