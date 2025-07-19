@@ -1,2 +1,2 @@
-# qbx-pawnshop
-Pawn Shop For QBOX
+# qbx_pawnshop
+Pawn Shop For Qbox
