@@ -1,6 +1,13 @@
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 local playersMelting = {} ---@type table<number, {itemName: string, amount: number, endTime: number}>
+local MAX_TRANSACTION_AMOUNT = 1000
+
+---@param amount any
+---@return boolean
+local function isValidAmount(amount)
+    return math.type(amount) == 'integer' and amount > 0 and amount <= MAX_TRANSACTION_AMOUNT
+end
 
 ---@param id string
 ---@param reason string
@@ -64,6 +71,8 @@ RegisterNetEvent('qb-pawnshop:server:sellPawnItems', function(itemName, itemAmou
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
 
+    if not Player or type(itemName) ~= 'string' or not isValidAmount(itemAmount) then return end
+
     if not isPlayerAtPawnShop(src) then
         exploitBan(src, 'sellPawnItems Exploiting')
         return
@@ -93,6 +102,12 @@ RegisterNetEvent('qb-pawnshop:server:meltItemRemove', function(itemName, itemAmo
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
 
+    if not Player or type(itemName) ~= 'string' or not isValidAmount(itemAmount) then return end
+    if not isPlayerAtPawnShop(src) then
+        exploitBan(src, 'meltItemRemove Exploiting')
+        return
+    end
+
     if playersMelting[src] then
         return
     end
@@ -120,24 +135,26 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
 
+    if not Player then return end
+
     if not isPlayerAtPawnShop(src) then
         exploitBan(src, 'pickupMelted Exploiting')
         return
     end
 
-    local meltingItem = getMeltingItemFromName(playersMelting[src].itemName)
+    local melting = playersMelting[src]
+    if not melting or melting.endTime > os.time() then
+        exploitBan(src, 'pickupMelted Exploiting')
+        return
+    end
+
+    local meltingItem = getMeltingItemFromName(melting.itemName)
     if not meltingItem then
         exploitBan(src, 'pickupMelted Exploiting')
         return
     end
 
-
-    if not playersMelting[src] or playersMelting[src].endTime > os.time() then
-        exploitBan(src, 'pickupMelted Exploiting')
-        return
-    end
-
-    local meltedAmount = playersMelting[src].amount
+    local meltedAmount = melting.amount
     playersMelting[src] = nil
 
     for i = 1, #meltingItem.rewards do
@@ -154,4 +171,8 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
     end
     TriggerClientEvent('qb-pawnshop:client:resetPickup', src)
     TriggerClientEvent('qb-pawnshop:client:openMenu', src)
+end)
+
+AddEventHandler('playerDropped', function()
+    playersMelting[source] = nil
 end)
