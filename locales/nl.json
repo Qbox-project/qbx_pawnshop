@@ -1,0 +1,29 @@
+{
+    "error": {
+        "negative": "Probeert u een negatief bedrag te verkopen?",
+        "no_melt": "Je hebt me niets gegeven om te smelten...",
+        "no_items": "Niet genoeg artikelen"
+    },
+    "success": {
+        "sold": "Je hebt%sx%sverkocht voor $%s",
+        "items_received": "Je hebt%sx%sontvangen"
+    },
+    "info": {
+        "title": "Pandjeshuis",
+        "subject": "Smeltende artikelen",
+        "message": "We zijn klaar met het smelten van je items. U kunt ze op elk gewenst moment komen ophalen.",
+        "open_pawn": "Open het pandjeshuis",
+        "sell": "Verkoop artikelen",
+        "sell_pawn": "Verkoop items aan het pandjeshuis",
+        "melt": "Smelt artikelen",
+        "melt_pawn": "Open de smeltwinkel",
+        "melt_pickup": "Gesmolten items ophalen",
+        "pawn_closed": "Pandjeshuis is gesloten. Kom terug tussen%s:00 uur -%s:00 uur",
+        "sell_items": "Verkoopprijs $%s",
+        "back": "⬅ Ga terug",
+        "melt_item": "Smelt%s",
+        "max": "Maximaal bedrag%s",
+        "submit": "Smelten",
+        "melt_wait": "Geef me%sminuten en ik laat je spullen smelten"
+    }
+}
