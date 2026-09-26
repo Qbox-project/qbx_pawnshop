@@ -1,6 +1,6 @@
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
-local playersMelting = {} ---@type table<number, {itemName: string, amount: number, endTime: number}>
+local playersMelting = {} ---@type table<number, {itemName: string, amount: number, endTime: number, claimed: number}>
 local MAX_TRANSACTION_AMOUNT = 1000
 
 ---@param amount any
@@ -125,7 +125,7 @@ RegisterNetEvent('qb-pawnshop:server:meltItemRemove', function(itemName, itemAmo
 
     TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[itemName], 'remove')
     local meltTime = (itemAmount * meltingItem.meltTime)
-    playersMelting[src] = { itemName = itemName, amount = itemAmount, endTime = os.time() + (meltTime * 60) }
+    playersMelting[src] = { itemName = itemName, amount = itemAmount, endTime = os.time() + (meltTime * 60), claimed = 0 }
 
     TriggerClientEvent('qb-pawnshop:client:startMelting', src, (meltTime * 60000 / 1000))
     exports.qbx_core:Notify(src, locale('info.melt_wait', meltTime), 'primary')
@@ -143,8 +143,14 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
     end
 
     local melting = playersMelting[src]
-    if not melting or melting.endTime > os.time() then
-        exploitBan(src, 'pickupMelted Exploiting')
+    if not melting then
+        TriggerClientEvent('qb-pawnshop:client:resetPickup', src)
+        TriggerClientEvent('qb-pawnshop:client:openMenu', src)
+        return
+    end
+
+    if melting.endTime > os.time() then
+        exports.qbx_core:Notify(src, locale('error.not_ready'), 'error')
         return
     end
 
@@ -154,21 +160,29 @@ RegisterNetEvent('qb-pawnshop:server:pickupMelted', function()
         return
     end
 
-    local meltedAmount = melting.amount
-    playersMelting[src] = nil
-
-    for i = 1, #meltingItem.rewards do
+    for i = melting.claimed + 1, #meltingItem.rewards do
         local reward = meltingItem.rewards[i]
+        local rewardAmount = melting.amount * reward.amount
+        local itemData = exports.ox_inventory:Items(reward.item)
 
-        local rewardAmount = reward.amount
-        if not Player.Functions.AddItem(reward.item, (meltedAmount * rewardAmount)) then
+        if not itemData then
+            lib.print.error(('melting reward %s for %s is not an ox_inventory item'):format(reward.item, melting.itemName))
+            exports.qbx_core:Notify(src, locale('error.pickup_failed'), 'error')
+            return
+        end
+
+        if not Player.Functions.AddItem(reward.item, rewardAmount) then
+            exports.qbx_core:Notify(src, locale('error.no_space'), 'error')
             TriggerClientEvent('qb-pawnshop:client:openMenu', src)
             return
         end
 
-        TriggerClientEvent('inventory:client:ItemBox', src, exports.ox_inventory:Items()[reward.item], 'add')
-        exports.qbx_core:Notify(src, locale('success.items_received', (meltedAmount * rewardAmount), exports.ox_inventory:Items()[reward.item].label), 'success')
+        melting.claimed = i
+        TriggerClientEvent('inventory:client:ItemBox', src, itemData, 'add')
+        exports.qbx_core:Notify(src, locale('success.items_received', rewardAmount, itemData.label), 'success')
     end
+
+    playersMelting[src] = nil
     TriggerClientEvent('qb-pawnshop:client:resetPickup', src)
     TriggerClientEvent('qb-pawnshop:client:openMenu', src)
 end)
