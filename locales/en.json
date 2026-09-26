@@ -2,7 +2,10 @@
     "error": {
         "negative": "Trying to sell a negative amount?",
         "no_melt": "You didn't give me anything to melt...",
-        "no_items": "Not enough items"
+        "no_items": "Not enough items",
+        "not_ready": "Your items aren't done melting yet",
+        "no_space": "You can't carry the melted items right now",
+        "pickup_failed": "Your melted items couldn't be handed over, contact staff"
     },
     "success": {
         "sold": "You have sold %s x %s for $%s",
